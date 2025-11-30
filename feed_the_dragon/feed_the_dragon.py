@@ -1,5 +1,5 @@
 # Feed the Dragon Game 1
-import pygame
+import pygame, random
 
 # Initialize pygame
 pygame.init()
@@ -46,6 +46,32 @@ lives_text = font.render("Lives: " + str(player_lives), True, GREEN, DARKGREEN)
 lives_rect = lives_text.get_rect()
 lives_rect.topright = (WINDOW_WIDTH - 10, 10)
 
+game_over_text = font.render("GAME OVER", True, GREEN, DARKGREEN)
+game_over_rect = game_over_text.get_rect()
+game_over_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+
+continue_text = font.render("Press any key to play again", True, GREEN, DARKGREEN)
+continue_rect = continue_text.get_rect()
+continue_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 32)
+
+
+# Set up sounds for the game
+coin_sound = pygame.mixer.Sound("./assets/coin_sound.wav")
+miss_sound = pygame.mixer.Sound("./assets/miss_sound.wav")
+miss_sound.set_volume(0.1)
+pygame.mixer.music.load("./assets/ftd_background_music.wav")
+
+# Set up images for the game
+player_image = pygame.image.load("./assets/dragon_right.png")
+player_rect = player_image.get_rect()
+player_rect.left = 32
+player_rect.centery = WINDOW_HEIGHT // 2
+
+coin_image = pygame.image.load("./assets/coin.png")
+coin_rect = coin_image.get_rect()
+coin_rect.x = WINDOW_WIDTH + BUFFER_DISTANCE
+coin_rect.y = random.randint(64, WINDOW_HEIGHT - 32)
+
 # Main Game Loop
 running = True
 while running:
@@ -53,11 +79,19 @@ while running:
     if event.type == pygame.QUIT:
       running = False
       
-  # Blit (copy) to the game surface
+  # Fill up display surface
+  display_surface.fill(BLACK)
+      
+  # Blit (copy) HUD to the game surface
   display_surface.blit(score_text, score_rect)
   display_surface.blit(title_text, title_rect)
   display_surface.blit(lives_text, lives_rect)
+  pygame.draw.line(display_surface, WHITE, (0, 64), (WINDOW_WIDTH, 64), 2)
       
+  # Blit images to the display surface
+  display_surface.blit(player_image, player_rect)
+  display_surface.blit(coin_image, coin_rect)
+  
   # update the game
   pygame.display.update()
   
