@@ -44,7 +44,7 @@ title_rect.y = 10
 
 lives_text = font.render("Lives: " + str(player_lives), True, GREEN, DARKGREEN)
 lives_rect = lives_text.get_rect()
-lives_rect.topright = (WINDOW_WIDTH - 10, 10)
+lives_rect.topright = (WINDOW_WIDTH - 20, 10)
 
 game_over_text = font.render("GAME OVER", True, GREEN, DARKGREEN)
 game_over_rect = game_over_text.get_rect()
@@ -73,12 +73,39 @@ coin_rect.x = WINDOW_WIDTH + BUFFER_DISTANCE
 coin_rect.y = random.randint(64, WINDOW_HEIGHT - 32)
 
 # Main Game Loop
+pygame.mixer.music.play(-1)
 running = True
 while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
       
+  # Move the player
+  keys = pygame.key.get_pressed()
+  
+  if keys[pygame.K_UP] and player_rect.top > 64:
+    player_rect.y -= PLAYER_VELOCITY
+  if keys[pygame.K_DOWN] and player_rect.bottom < WINDOW_HEIGHT:
+    player_rect.y += PLAYER_VELOCITY
+    
+  # Coin Movement
+  if coin_rect.x < 0:
+    miss_sound.play()
+    player_lives -= 1
+    coin_rect.x = WINDOW_WIDTH + BUFFER_DISTANCE
+    coin_rect.y = random.randint(64, WINDOW_HEIGHT - 32)
+  else:
+    coin_rect.x -= coin_velocity
+    
+  if player_rect.colliderect(coin_rect):
+    score += 1
+    coin_velocity += COIN_ACCELERATION
+    coin_rect.x = WINDOW_WIDTH + BUFFER_DISTANCE
+    coin_rect.y = random.randint(64, WINDOW_HEIGHT - 32)
+    
+  # Text Rendering 
+  lives_text = font.render("Lives: " + str(player_lives), True, GREEN, DARKGREEN)
+  
   # Fill up display surface
   display_surface.fill(BLACK)
       
@@ -94,6 +121,9 @@ while running:
   
   # update the game
   pygame.display.update()
+  
+  # Set the FPS and clock
+  clock.tick(FPS)
   
 # End the game
 pygame.quit()
